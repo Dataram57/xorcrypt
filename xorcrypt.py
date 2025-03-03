@@ -3,12 +3,16 @@ import string
 import importlib.util
 import sys
 
+#================================================================
+#
+#                  Infinite Key Generator Module                  
+#
+#----------------------------------------------------------------
+
 spec = importlib.util.spec_from_file_location("module_name", "ikg_sha256.py")
 ikg = importlib.util.module_from_spec(spec)
 sys.modules["module_name"] = ikg
 spec.loader.exec_module(ikg)
-
-
 
 #================================================================
 #
@@ -28,7 +32,6 @@ def GetKeyChunk():
         key += str(indexo)
     return bytearray(key, 'utf-8')
 
-
 #================================================================
 #
 #                       Basic Operations                       
@@ -37,33 +40,34 @@ def GetKeyChunk():
 
 # Function to XOR encrypt/decrypt a file using the key generator
 def XOREncryptDecrypt(input_file, output_file):
-    with open(input_file, 'rb') as f_in:
-        data = f_in.read()
-
+    data = bytearray()
     encrypted_data = bytearray()
-    data_len = len(data)
-    i = 0
-
-    while i < data_len:
-        # Generate a new key for each byte
-        key = ikg.GetKeyChunk()
-
-        # The number of bytes from the key to use
-        key_len = len(key)
-
-        # XOR the data using the current key
-        j = 0
-        while j < key_len:
-            if i < data_len:
-                encrypted_data.append(data[i] ^ key[j])
-                i += 1
-            else:
+    with open(input_file, 'rb') as f_in, open(output_file, 'wb') as f_out:
+        while True:
+            #Generate Key
+            key = ikg.GetKeyChunk()
+            key_len = len(key)
+            #Read chunk to xor
+            data = f_in.read(key_len)
+            #check EOF
+            if not data:
                 break
-            j += 1
-
-    # Write the encrypted/decrypted data to the output file
-    with open(output_file, 'wb') as f_out:
-        f_out.write(encrypted_data)
+            #more info
+            data_len = len(data)
+            #XOR the data
+            i = 0
+            f = min(data_len, key_len)
+            encrypted_data = bytearray()
+            while i < f:
+                encrypted_data.append(data[i] ^ key[i])
+                i += 1
+            #Write the encrypted/decrypted data to the output file
+            f_out.write(encrypted_data)
+    #shred
+    i = len(data)
+    while i > 0:
+        i -= 1
+        data[i] = 0x00
 
     print(f"Operation completed. File saved as: {output_file}")
 
@@ -85,5 +89,7 @@ if __name__ == "__main__":
     ikg.SetKey(key)
     XOREncryptDecrypt(input_file, encrypted_file)
     # Decrypt the file (using the same function)
-    ikg.SetKey(key)
+    ikg.Reset()
     XOREncryptDecrypt(encrypted_file, decrypted_file)
+    #shred
+    ikg.Shred()
