@@ -109,7 +109,7 @@ class SHA256:
         r = copy.deepcopy(self)
         r.update(_pad(self._counter))
         data = [struct.pack('!L', i) for i in r._h[:self._output_size]]
-        return b''.join(data)
+        return bytearray().join(data)
 
     def hexdigest(self):
         return binascii.hexlify(self.digest()).decode('ascii')
@@ -121,18 +121,30 @@ class SHA256:
 #
 #----------------------------------------------------------------
 
-salt = b""
-lastHash = b""
+salt = bytearray()
+lastHash = bytearray()
 
 def SetKey(key):
     global salt
     global lastHash
-    salt = key.encode('ascii')
-    lastHash = b""
+    salt = bytearray(key.encode('ascii'))
+    lastHash = bytearray()
 
 def Reset():
     global lastHash
-    lastHash = b""
+    lastHash = bytearray()
+
+def Shred():
+    global salt
+    global lastHash
+    i = len(salt)
+    while i > 0:
+        i -= 1
+        salt[i] = 0x00
+    i = len(lastHash)
+    while i > 0:
+        i -= 1
+        lastHash[i] = 0x00
 
 def GetKeyChunk():
     global salt
