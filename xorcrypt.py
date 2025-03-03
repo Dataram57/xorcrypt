@@ -5,17 +5,6 @@ import sys
 
 #================================================================
 #
-#                  Infinite Key Generator Module                  
-#
-#----------------------------------------------------------------
-
-spec = importlib.util.spec_from_file_location("module_name", "ikg_sha256.py")
-ikg = importlib.util.module_from_spec(spec)
-sys.modules["module_name"] = ikg
-spec.loader.exec_module(ikg)
-
-#================================================================
-#
 #                    Infinite Key Managment                    
 #
 #----------------------------------------------------------------
@@ -77,19 +66,21 @@ def XOREncryptDecrypt(input_file, output_file):
 #
 #----------------------------------------------------------------
 
-
 # Main execution
 if __name__ == "__main__":
-    input_file = "input.txt"  # Replace with your file path
-    key = "VERYLONGKEYAAAAAAAAAAAAAAAAAAAAAAAAAA###############***F*FHR*$@#)"
-    encrypted_file = "encrypted.txt"
-    decrypted_file = "decrypted.txt"
-
-    # Encrypt the file
-    ikg.SetKey(key)
-    XOREncryptDecrypt(input_file, encrypted_file)
-    # Decrypt the file (using the same function)
-    ikg.Reset()
-    XOREncryptDecrypt(encrypted_file, decrypted_file)
-    #shred
-    ikg.Shred()
+    if len(sys.argv) >= 4:
+        #load module
+        ikg_name = "ikg_sha256.py"
+        if len(sys.argv) > 4:
+            ikg_name = sys.argv[4]
+        spec = importlib.util.spec_from_file_location("module_name", ikg_name)
+        ikg = importlib.util.module_from_spec(spec)
+        sys.modules["module_name"] = ikg
+        spec.loader.exec_module(ikg)
+        #Encrypt/Decrypt
+        ikg.SetKey(sys.argv[3])
+        XOREncryptDecrypt(sys.argv[1], sys.argv[2])
+        #shred
+        ikg.Shred()
+    else:
+        print("xorcrypt.py <INPUT_FILE> <OUTPUT_FILE> <KEY>")
