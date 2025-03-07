@@ -156,7 +156,7 @@ def Shred():
 def GetKeyChunk():
     global salt
     global lastHash
-    print(SHA256().update(lastHash + salt).hexdigest())
+    #print(SHA256().update(lastHash + salt).hexdigest())
     lastHash = SHA256().update(lastHash + salt).digest()
     return lastHash
 
