@@ -1,25 +1,5 @@
-import random
-import string
 import importlib.util
 import sys
-
-#================================================================
-#
-#                    Infinite Key Managment                    
-#
-#----------------------------------------------------------------
-
-indexo = 0
-
-def GetKeyChunk():
-    global indexo
-    key_size = random.randint(1, 10)  # Key size will be random between 1 and 10 bytes
-    key = ""
-    while key_size > 0:
-        key_size -= 1
-        indexo += 1
-        key += str(indexo)
-    return bytearray(key, 'utf-8')
 
 #================================================================
 #
